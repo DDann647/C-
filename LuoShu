@@ -1,0 +1,92 @@
+// A program that generates and tests a 3x3 grid of random numbers from 1-9
+// Determins if they are a Luo Shu Squre (all diagonals, horizontals, and verticals add up to the same number)
+//{{4,9,2}, {3,5,7}, {8,1,6}} example of a Luo Shu  Square
+
+#include <iostream>
+#include <stdio.h>
+#include <time.h>
+#include <stdlib.h>
+#include <iomanip>
+#include <thread>
+#include <chrono>
+using namespace std;
+
+struct threeByThree
+{
+	int arr[3][3];
+};
+
+threeByThree box();
+bool luoShu(int x[][3]);
+
+int main()
+{
+	struct threeByThree z;
+	srand(time(NULL));
+	do
+	{
+		cout << "New matrix" << endl;
+		z = box();
+		for (int i = 0; i < 3; i++)
+		{
+			for (int j = 0; j < 3; j++)
+			{
+				cout << z.arr[i][j] << '\t';
+			}
+			cout << endl << endl;
+		}
+
+		if (luoShu(z.arr))
+		{
+			cout << "This matrix is a Luo Shu Square!" << endl;
+		}
+		else
+		{
+			cout << "This matrix is not a Luo Shu Square" << endl;
+		}
+		cout << "A new matrix will be generated in 1 second... " << endl;
+		this_thread::sleep_for(chrono::milliseconds(1000));
+	} while (!(luoShu(z.arr)));
+}
+
+threeByThree box()
+{
+	srand(time(NULL)); 
+	struct threeByThree a;
+	bool used[9] = { false };
+	for (int i = 0; i < 3; i++)
+		for (int j = 0; j < 3; j++)
+		{
+			do
+			{
+				a.arr[i][j] = rand() % 9 + 1;
+			} while (used[a.arr[i][j]-1] == true);
+			used[a.arr[i][j]-1] = true;
+		}
+	return a;
+}
+
+bool luoShu(int x[][3])
+{
+	int t, ma, b, l, md, r, d1 = x[0][0] + x[1][1] + x[2][2], d2 = x[0][2] + x[1][1] + x[2][0];
+	for (int i = 0; i < 3; i++)
+	{
+		if (i == 0)
+		{
+			t = x[i][0] + x[i][1] + x[i][2];
+			l = x[0][i] + x[1][i] + x[2][i];
+		}
+		if (i == 1)
+		{
+			ma = x[i][0] + x[i][1] + x[i][2];
+			md = x[0][i] + x[1][i] + x[2][i];
+		}
+		if (i == 2)
+		{
+			b = x[i][0] + x[i][1] + x[i][2];
+			r = x[0][i] + x[1][i] + x[2][i];
+		}
+	}
+
+	return ((t == ma) && (ma == b) && (b == l) && (l == md) && (md == r) && (r == d1) && (d1 == d2));
+}
