@@ -1,0 +1,62 @@
+//Grade calculator
+
+#include <iostream>
+#include <iomanip>
+using namespace std;
+
+int main()
+{
+	float currentGrade = 0, examW=1, pass=0, minGrade, weighReq = 0; 
+	cout << "What is your average in this class before the exam: ";
+	do
+	{
+		if (!(0 <= currentGrade && currentGrade <= 100))
+		{
+			cout << "Enter a valid grade... 0-100%: ";
+		}
+		cin >> currentGrade;
+	} while (!(0 <= currentGrade && currentGrade <= 100));
+	
+	cout << endl << "What is the exam worth in %: ";
+	do
+	{
+		if (!(0 < examW && examW <= 100))
+		{
+			cout << "Enter a valid weight... 1-100%: ";
+		}
+		cin >> examW;
+	} while (!(0 < examW && examW <= 100));
+
+	cout << endl << "What is the minimum grade you need to pass the class in %: ";
+	do
+	{
+		if (!(0 <= pass && pass <= 100))
+		{
+			cout << "Enter a valid grade... 0-100%: ";
+		}
+		cin >> pass;
+	} while (!(0 <= pass && pass <= 100));
+
+	for (float i = 0; i < 100; i += 0.1)
+	{
+		minGrade= (100 - (examW - i)) * (currentGrade / 100);
+		if (minGrade>= pass)
+		{
+			weighReq = i;
+			break;
+		}
+	}
+
+	if (((weighReq / examW) * 100) > 100)
+	{
+		cout << endl << "It's joever";
+	}
+	else if (((weighReq / examW) * 100) == 0)
+	{
+		cout << "You can skip the exam and pass";
+	}
+	else
+	{
+		cout << setprecision(3) << "To get a " << minGrade<< "% in this course, you'd need a " << (weighReq / examW) * 100 << "% on the exam.";
+	}
+}
