@@ -1,0 +1,54 @@
+// This program calculates sinx/x for a range of numbers at a selected increment
+
+#include <iostream>
+#include <cmath>
+#include <iomanip>
+using namespace std;
+float sinc(float x);
+int main()
+{
+	//declaring variables
+	double lower, upper, i;
+	do {
+		//prompting the user for input
+		cout << "Hello user! Please enter the lower limit: ";
+		cin >> lower;
+		cout << "\nNow enter the upper limit: ";
+		cin >> upper;
+		cout << "\nNow enter the increment: ";
+		cin >> i;
+		if (i < 0)
+		{
+			//error message for an invalid increment
+			cout << "\nPlease enter a valid increment...\n";
+		}
+		if (lower > upper)
+		{
+			//error message for an invalid range
+			cout << "\nPlease ensure the upper limit is greater than the lower limit...\n";
+		}
+		//do while ensures the user inputs a proper increment and a proper range
+	} while (lower > upper || i < 0);
+	cout << "\nx\tsinc(x)" << "\n****************";
+	//lower will be the value used to calculate sinc(x); so lower will increase by the increment each time until lower = upper
+		for (double x = lower; x <= upper; x += i)
+		{
+			//calculating sinc(lower)
+			
+			if (x == 0)
+			{
+				//since sin(0)/0 displays an error, when lower = 0, the output	will be set to 1
+					cout << "\n" << x << "\t" << "1.0000";
+			}
+			else
+			{
+				//outputting the values in a chart style format
+				cout << "\n" << x << "\t" << setprecision(4) << sinc(x);
+			}
+		}
+}
+
+float sinc(float x)
+{
+	return (sin(x) / x);
+}
