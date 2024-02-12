@@ -1,0 +1,68 @@
+// Generates avg1100x3 array of random integers between -25,000 and 25,000; 
+// then calculates the average of each column
+
+#include <iostream>
+#include <stdio.h>
+#include <fstream>
+
+using namespace std;
+
+struct avg
+    { 
+    int info[100][3]; 
+    double avg1, avg2, avg3; 
+    };
+
+void calcAvg(avg * e);
+
+int main()
+{
+    ofstream writeData("data2019.txt", ios::out);
+
+    srand(time(NULL));
+
+    for (int i = 0; i < 100; i++)
+    {
+        if (!writeData)
+        { cout << "File failed to open"; break; }
+
+        for (int j = 0; j < 3; j++)
+        {
+            writeData << rand() % 50000 - 25000 << "\t"; 
+        }
+        writeData << endl;
+    }
+
+    writeData.close();
+
+    ifstream readData("data2019.txt", ios::in);
+    avg fileData;
+
+    for (int x = 0; x < 100; x++)
+    {
+        if (!readData)
+        { cout << "File failed to open"; break; }
+        for (int y = 0; y < 3; y++)
+        { 
+            readData >> fileData.info[x][y];
+            cout << fileData.info[x][y] << "\t"; 
+        }
+        cout << endl;
+    }
+    
+    calcAvg(&fileData);
+    cout << "\navg 1 = " << fileData.avg1<< " avg 2 = " << fileData.avg2<< " avg 3 = " << fileData.avg3;
+    readData.close();
+}
+
+void calcAvg(avg * e)
+{
+    double h = 0, i = 0, v = 0;
+    for (int be = 0; be < 100; be++)
+    {
+        h += e->info[be][0];
+        i += e->info[be][1];
+        v += e->info[be][2];
+    }
+    e->avg1 = h / 100; e->avg2 = i / 100; e->avg3 = v / 100;
+}
