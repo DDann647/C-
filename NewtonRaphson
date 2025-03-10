@@ -1,0 +1,66 @@
+// Daniel Chan - 2MS3 - Newton Raphson Root Finding Method
+#include <iostream>
+#include <cmath>
+#include <iomanip>
+
+using namespace std;;
+
+//function headers
+double f(double x);
+double df(double x);
+void newton(double fx, double fp, double x, double nmax, double eps, double del);
+
+//defining main function
+int main()
+{
+    //calling the newton function
+    newton(0, 0, 10, 50, 0.0001, 0.01);
+}
+
+//defining the function f(x)
+double f(double x)
+{
+    return (2700.0 * (log((250000.0 / (250000.0 - (3680 * x))))) - (9.81 * x) - 2000);
+}
+
+//defining the derivative of the function f(x) 
+double df(double x)
+{
+    return ((124200 / (3125 - (46 * x))) - 9.81);
+}
+
+//defining the newton function
+void newton(double fx, double fp, double x, double nmax, double eps, double del)
+{
+    //calculating f(0) and f'(0) and outputting the line for n = 0 and x = starting value
+    fx = f(x);
+    fp = df(x);
+    cout << "n = 0, x = " << x << " , f(x) = " << fx << "." << endl;
+
+    for (int n = 1; n < nmax; n++)
+    {
+        //calculating delta for the previous n, and calculating the next x value with regards to this delta
+        del = fx / fp;
+        x = x - del;
+        //then calculating the functiona nd it's derivative at the new x value
+        fp = df(x);
+        fx = f(x);
+        
+        //if the absolute value of the derivative is less than delta, the derivative is too small
+        if (abs(fp) < del)
+        {
+            cout << "Small derivative";
+            return;
+        }
+      
+        //outputting the current iteration's results with a precision of 6 decimal places
+        cout << fixed << setprecision(6) << "n = " << n << ", x = " << x << ", f(x) = " << fx << "." << endl;
+
+        //if the absolute value of the delta is less than the epsilon value, the function has converged within our error value
+        if (abs(del) < eps)
+        {
+            cout << "Convergance";
+            return;
+        }
+    }
+}
