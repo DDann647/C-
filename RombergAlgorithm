@@ -1,0 +1,41 @@
+// Daniel Chan - 2MS3 - Romberg Algorithm
+#include <iostream>
+#include <cmath>
+#include <vector>
+#define f(x) (195.0 * (x / (7.0 + x)) * exp(-3.0 * x / 25.0))
+
+using namespace std;
+
+double Romberg(int a, int b, int n);
+
+int main()
+{
+    cout << "Romberg Algorithm for n = 2, R(2,2) = " << Romberg(0, 25, 2) << endl;
+    cout << "Romberg Algorithm for n = 20, R(20,20) = " << Romberg(0, 25, 20);
+}
+
+double Romberg(int a, int b, int n)
+{
+    double z, h, sum;
+    vector<double> row(n, 0);
+    vector<vector<double>> r(n, row);
+    h = b - a;
+    r[0][0] = ((h / 2) * (f(a) + f(b)));
+    for (int i = 1; i < n; i++)
+    {
+        h = h / 2;
+        sum = 0;
+        for (int k = 1; k < pow(2, i)-1; k += 2)
+        {
+            z = a + k * h;
+            sum = sum + f(z);
+        }
+        r[i][0] = ((1.0 / 2.0) * r[i - 1][0] + sum * h);
+        for (int j = 1; j <= i; j++)
+        {
+            r[i][j] = r[i][j - 1] + ((r[i][j - 1] - r[i - 1][j - 1]) / (pow(4, j) - 1));
+        }
+    }
+
+    return r[n-1][n-1];
+}
