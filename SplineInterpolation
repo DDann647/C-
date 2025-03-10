@@ -1,0 +1,225 @@
+#include <iostream>
+#include <string>
+#include <cmath>
+
+using namespace std;
+
+double calcM(double c1, double bar1, double c0, double bar0);
+
+double calcAtTemp(double temps[2][6], double ms[5], double temp);
+
+void calcH(double temps[2][6], double h[5]);
+
+void calcZ(double temps[2][6], double z[5], double h[5]);
+
+double calcQ(double temps[2][6], double z[5], double h[5], double temper);
+
+void calcB(double h[5], double b[5], double temps[2][6]);
+
+void calcU(double temps[2][6], double h[5], double u[5]);
+
+void calcV(double temps[2][6], double v[5], double h[5], double u[5], double b[5]);
+
+void calcZ(double temps[2][6], double v[5], double h[5], double u[5], double b[5], double z[5]);
+
+double calcS(double temps[2][6], double v[5], double h[5], double u[5], double b[5], double z[5], double temper);
+
+int main()
+{
+    const int rows = 2, columns = 6; 
+    double data[rows][columns] = { { 30, 38, 46, 54, 62, 70}, { 0.5025, 0.1024, 0.3944, 0.1577, 0.5214, 0.5278} };
+    double m[5] = { 0, 0, 0, 0, 0};
+    double *h, *z, *b, *u, *v;
+    h = new double[5];
+    z = new double[5];
+    b = new double[5];
+    u = new double[5];
+    v = new double[5];
+
+    cout << "First order spline: " << endl;
+    for (int i = 1; i < columns; i++)
+    {
+        m[i-1] = calcM(data[0][i], data[1][i], data[0][i - 1], data[1][i - 1]);
+    }
+
+    for (int i = 0; i < columns-1; i++)
+    {
+        cout << "S" << i << "(x) = " << data[1][i] << " + " << m[i] << " * (x - " << data[0][i] << "),  ";
+        cout << data[0][i] << " < x < " << data[0][i+1] << endl;
+    }
+   
+
+    cout << "\nThe value at 42.1 is " << calcAtTemp(data, m, 42.1) << " bar" << endl;
+    cout << "The value at 57.2 is " << calcAtTemp(data, m, 57.2) << " bar" << endl;
+
+
+    cout << "\n\nSecond Order Spline: " << endl;
+
+    calcH(data, h);
+    calcZ(data, z, h);
+
+    cout << "The value at 42.1 is " << calcQ(data, z, h, 42.1) << " bar" << endl;
+    cout << "The value at 52.7 is " << calcQ(data, z, h, 57.2) << " bar" << endl;
+
+    cout << "\n\nThird Order Spline: " << endl;
+
+    calcH(data, h);
+    calcB(h, b, data);
+    calcU(data, h, u);
+    calcV(data, v, h, u, b);
+    calcZ(data, v, h, u, b, z);
+    calcS(data, v, h, u, b, z, 42.1);
+
+    cout << "The value at 42.1 is " << calcS(data, v, h, u, b, z, 42.1) << " bar" << endl;
+    cout << "The value at 52.7 is " << calcS(data, v, h, u, b, z, 57.2) << " bar" << endl;
+
+
+    delete[] h;
+    delete[] z;
+    delete[] b;
+    delete[] u;
+    delete[] v;
+    return 0;
+}
+
+double calcM(double c1, double bar1, double c0, double bar0)
+{
+    double m;
+    m =  (bar1 - bar0)/ (c1 - c0);
+    return m;
+}
+
+double calcAtTemp(double temps[2][6], double ms[5], double temp)
+{
+    for (int i = 0; i < 65; i++)
+    {
+        if (temp < temps[0][i+1])
+        {
+            return (temps[1][i] + (ms[i] * (temp - temps[0][i])));
+        }
+        else
+        {
+            continue;
+        }
+    }
+    return 0;
+}
+
+void calcH(double temps[2][6], double h[5])
+{
+    for (int i = 0; i < 5; i++)
+    {
+        h[i] = temps[0][i + 1] - temps[0][i];
+    }
+}
+
+void calcZ(double temps[2][6], double z[5], double h[5])
+{
+    z[0] = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        z[i + 1] = -z[i] + 2 * ((temps[1][i + 1] - temps[1][i]) / h[i]);
+    }
+}
+
+double calcQ(double temps[2][6], double z[5], double h[5], double temper)
+
+{
+    string j;
+    double temp;
+    double q = 0;
+    for (int i = 0; i < 5; i++)
+    {
+        temp = ((z[i + 1] - z[i]) / (2 * h[i]));
+        j += to_string(temp) + "(x - " + to_string(temps[0][i]) + ")^2 + " + to_string(z[i]) + "(x - " + to_string(temps[0][i]) + ") + " + to_string(temps[1][i]) + "\n\n";
+    }
+    if (temper == 42.1)
+    {
+        cout << j;
+    }
+    for (int i = 0; i < 5; i++)
+    {
+        temp = ((z[i + 1] - z[i]) / (2 * h[i]));
+        if (temper < temps[0][i+1])
+        {
+            q = (temp * (pow((temper - temps[0][i]), 2))) + z[i] * (temper - temps[0][i]) + temps[1][i];
+            return q;
+        }
+        else
+        {
+            continue;
+        }
+    }
+    return 0;
+}
+
+//cubic
+void calcB(double h[5], double b[5], double temps[2][6])
+{
+    for (int i = 0; i < 5; i++)
+    {
+        b[i] = (temps[1][i + 1] - temps[1][i]) / h[i];
+    }
+}
+
+void calcU(double temps[2][6], double h[5], double u[5])
+{
+    u[1] = 2*(h[0] - h[1]);
+
+    for (int i = 2; i < 5; i++)
+    {
+        u[i] = (2 * (h[i - 1] + h[i])) - (pow(h[i - 1], 2) / u[i - 1]);
+    }
+}
+
+void calcV(double temps[2][6], double v[5], double h[5], double u[5], double b[5])
+{
+    v[1] = 6 * (b[1] - b[0]);
+    for (int i = 2; i < 5; i++)
+    {
+        v[i] = (6 * (b[i] - b[i - 1])) - ((h[i - 1] * v[i] - 1) / u[i - 1]);
+    }
+}
+
+void calcZ(double temps[2][6], double v[5], double h[5], double u[5], double b[5], double z[5])
+{
+    z[0] = 0; z[4] = 0;
+    for (int i = 3; i > 1; i--)
+    {
+        z[i] = (v[i] - h[i] * z[i + 1]) / u[i];
+    }
+}
+
+double calcS(double temps[2][6], double v[5], double h[5], double u[5], double b[5], double z[5], double temper)
+{
+    string j = "";
+    double const1, const2, const3, const4;
+    double s = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        const1 = z[i + 1] / (6 * h[i]);
+        const2 = z[i] / 6 * h[i];
+        const3 = (temps[1][i + 1] / h[i]) - (h[i] * z[i + 1] / 6);
+        const4 = (temps[1][i] / h[i]) - (h[i] * z[i + 1] / 6);
+        j += to_string(const1) + "(x - " + to_string(temps[0][i]) + ")^3 + " + to_string(const2) + "(" + to_string(temps[0][i + 1]) + " - x)^3 + " + to_string(const3) + "(x - " + to_string(temps[0][i]) + ") + " + to_string(const4) + "(" + to_string(temps[0][i + 1]) + " - x)\n";
+        if (temper == 42.1)
+        {
+            cout << j;
+        }
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        const1 = z[i + 1] / (6 * h[i]);
+        const2 = z[i] / 6 * h[i];
+        const3 = (temps[1][i + 1] / h[i]) - (h[i] * z[i + 1] / 6);
+        const4 = (temps[1][i] / h[i]) - (h[i] * z[i + 1] / 6);
+        if (temper > temps[0][i + 1])
+        {
+            s = const1 * pow((temper - temps[0][i]), 3) + const2 * pow((temps[0][i + 1] - temper), 3) + const3 * (temper - temps[0][i]) + const4 * (temps[0][i + 1] - temper);
+            return s;
+        }
+    }
+
+
+    return s;
+}
